@@ -3,6 +3,8 @@
 #include "Req.h"
 #include <vector>
 #include <IO_Manager.h>
+#include <set>
+#include <AvlTree.h>
 
 class Analysis
 {
@@ -33,12 +35,12 @@ public:
 		struct AvlKey
 		{
 			AvlKey(unsigned int min = 0, unsigned int max = 0);
-			inline bool operator <(const AvlKey &key) const;
-			inline bool operator ==(const AvlKey &key) const;
-			inline bool operator <=(const AvlKey &key) const;
-			inline bool operator >(const AvlKey &key) const;
-			inline bool operator >=(const AvlKey &key) const;
-			inline bool operator !=(const AvlKey &key) const;
+			inline virtual bool operator <(const AvlKey &key) const;
+			inline virtual bool operator ==(const AvlKey &key) const;
+			inline virtual bool operator <=(const AvlKey &key) const;
+			inline virtual bool operator >(const AvlKey &key) const;
+			inline virtual bool operator >=(const AvlKey &key) const;
+			inline virtual bool operator !=(const AvlKey &key) const;
 			unsigned int min, max;
 		};
 	protected:

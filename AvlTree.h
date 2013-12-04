@@ -1,4 +1,5 @@
 #pragma once
+#define NULL 0
 
 template <typename KEY,typename VALUE> class AvlTree
 {
@@ -11,14 +12,13 @@ public:
 	AvlTree<KEY, VALUE>* right;
 	bool empty;						//заполнены ключ и значение или нет
 
-	AvlTree()
+	AvlTree(void)
 	{
-		empty=true;
+		empty = true;
 		left = NULL;
 		right = NULL;
 		balance = 0;
 	}
-
 	AvlTree(KEY Key,VALUE Value)
 	{ 
 		empty=false;
@@ -270,9 +270,13 @@ public:
 			return 0;
 		}
 	}
+	AvlTree<KEY, VALUE> *find(const KEY &key)
+	{
+		return find_by_key(this, key);
+	}
 	~AvlTree(void)
 	{
-		AvlTree <KEY, VALUE> *node = this;
+		free_subtree(this);
 	}
 private:
 	void free_subtree(AvlTree <KEY, VALUE> *node)
@@ -285,6 +289,19 @@ private:
 		{
 			free_subtree(node->left);
 			free_subtree(node->right);
+		}
+	}
+	AvlTree<KEY, VALUE> *find_by_key(AvlTree<KEY, VALUE> *node, const KEY &key)
+	{
+		if (node == NULL) { return NULL; }
+		if (node->key == key)
+		{
+			return node;
+		}
+		else
+		{
+			if (node->key < key) { return find_by_key(node->right, key); }
+			else { return find_by_key(node->left, key); }
 		}
 	}
 };

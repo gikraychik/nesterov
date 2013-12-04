@@ -75,57 +75,20 @@ std::vector<Address> Analysis::AddressAnalisys::addresses(void) const
 
 void Analysis::AddressAnalisys::calc_stack_dist(void)
 {
-	const int N = v.size();
-	const unsigned int inf = std::numeric_limits<unsigned int>::max();  // max value of unsigned int
-	int **P = new int *[N+1];
-	int **B = new int *[N+1];
-	for (int i = 0; i < N+1; i++)
+	typedef AvlTree<Address, unsigned int> AVL;
+	const unsigned int N = v.size();			// amount of links (addresses)
+	AVL cache;									// contains all addresses that are currently located at the stack (cache)
+	for (unsigned int i = 0; i < N; i++)
 	{
-		P[i] = new int[N+1];
-		B[i] = new int[N+1];
-	}
-	for (int t = 0; t < N; t++)
-	{
-		bool P_defined = false;
-		for (int i = t; i >=0 ; i--)
+		if (AVL *node = cache.find(v[i]))		// v[i] is already in the cache
 		{
-			if (v[t] == v[i]) { P[t][t] = i; P_defined = true; break; }
-		}
-		if (!P_defined) { P[t][t] = inf; }
-		
-		// next calculating dist(t)
-		if (!P_defined)
-		{
-			v[t].set_dist(inf);
+			node->value = i;
 		}
 		else
 		{
-			unsigned int sum = 0;
-			for (int i = P[t][t]; i < t; i++)
-			{
-				if (B[t][i] == 1) { sum++; }
-			}
-			v[t].set_dist(sum);
-		}
-
-		// updating stage
-		for (int i = 0; i <= t; i++)
-		{
-			if (i == t) { B[t+1][i] = 1; }
-			else if (i == P[t][t]) { B[t+1][i] = 0; }
-			else { B[t+1][i] = B[t][i]; }
-			P[t+1][i] = (v[i] == v[t]) ? t : P[t][i];
+			cache.add(v[i], i);
 		}
 	}
-
-	// cleaning up memory
-	for (int i = 0; i < N+1; i++)
-	{
-		delete[] P[i];
-		delete[] B[i];
-	}
-	delete[] P;
-	delete[] B;
 }
 
 /*
@@ -158,3 +121,6 @@ bool Analysis::AddressAnalisys::AvlKey::operator!=(const AvlKey &key) const
 {
 	return ! operator ==(key);
 }
+/*
+	Definition of class AvlKey is over.
+*/
