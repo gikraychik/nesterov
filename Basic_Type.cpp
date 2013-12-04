@@ -44,3 +44,7 @@ std::ostream &operator <<(std::ostream &stream, const Basic_Type obj)
 	std::cout << obj.val;
 	return std::cout;
 }
+void Basic_Type::set_val(big_int new_value)
+{
+	val = new_value;
+}

@@ -15,6 +15,8 @@ public:
 	void set_num_addr(mem_rep value);  // sets new value for m_num_addr
 	void set_dist(unsigned int dist);
 	unsigned int get_dist(void) const;
+
+	friend std::istream &operator >>(std::istream &input, Address &addr);
 protected:
 	unsigned int dist;  // stack distance
 private:

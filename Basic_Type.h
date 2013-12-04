@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-typedef unsigned __int64 big_int;
+typedef unsigned long long big_int;
 
 class Basic_Type
 {
@@ -16,9 +16,10 @@ public:
 	inline virtual bool operator !=(const Basic_Type obj) const;
 
 	inline virtual big_int get_val(void) const;
+	inline virtual void set_val(big_int new_value);
 	
 	friend std::ostream &operator <<(std::ostream &stream, const Basic_Type obj);
 	inline bool was_defined(void);
-protected:
-	big_int val;
+private:
+	big_int val;  // contains numeric information about object
 };

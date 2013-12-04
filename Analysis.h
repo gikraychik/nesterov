@@ -1,8 +1,8 @@
 #pragma once
-#include <fstream>
 #include <exception>
 #include "Req.h"
 #include <vector>
+#include <IO_Manager.h>
 
 class Analysis
 {
@@ -20,7 +20,9 @@ public:
 	inline MyTime time(int i) const;
 	inline req_size size(int i) const;
 	inline req_type type(int i) const;
-protected:
+
+	Req operator [] (int i) const;  // acceses a request of index i
+
 	class AddressAnalisys
 	{
 	public:
@@ -28,13 +30,24 @@ protected:
 		AddressAnalisys(const Analysis &analis);
 		void calc_stack_dist(void);
 		inline std::vector<Address> addresses(void) const;
+		struct AvlKey
+		{
+			AvlKey(unsigned int min = 0, unsigned int max = 0);
+			inline bool operator <(const AvlKey &key) const;
+			inline bool operator ==(const AvlKey &key) const;
+			inline bool operator <=(const AvlKey &key) const;
+			inline bool operator >(const AvlKey &key) const;
+			inline bool operator >=(const AvlKey &key) const;
+			inline bool operator !=(const AvlKey &key) const;
+			unsigned int min, max;
+		};
 	protected:
 		std::vector<Address> v;
 	private:
 
 	};
 private:
-	std::ifstream input;
+	std::fstream input;
 	std::vector<Req> v;
 };
 

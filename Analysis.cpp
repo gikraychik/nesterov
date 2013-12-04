@@ -1,4 +1,5 @@
 #include "Analysis.h"
+#include <IO_Manager.h>
 #include <limits>
 
 Analysis::Analysis(void)
@@ -7,11 +8,13 @@ Analysis::Analysis(void)
 
 Analysis::Analysis(const char *filename)
 {
-	std::ifstream input(filename);
-	if (!input.is_open())
+	IO_Manager *m = new IO_Manager(std::string(filename));
+	while (Req *req = m->read_next_req())
 	{
-		throw std::exception("Analysis::analysis : file was not opened");
+		v.push_back(*req);
+		delete req;
 	}
+	delete m;
 }
 
 Analysis::~Analysis(void)
@@ -51,6 +54,10 @@ req_size Analysis::size(int i) const
 req_type Analysis::type(int i) const
 {
 	return req(i).type;
+}
+Req Analysis::operator [] (int i) const
+{
+	return req(i);
 }
 
 Analysis::AddressAnalisys::AddressAnalisys(void) : v() {}
@@ -119,4 +126,35 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 	}
 	delete[] P;
 	delete[] B;
+}
+
+/*
+	Defenition of class AvlKey
+	AvlKey is used only in "void cals_stack_dist(void)"
+	AvlKey is a unique key in AVL tree
+*/
+Analysis::AddressAnalisys::AvlKey::AvlKey(unsigned int min, unsigned int max) : min(min), max(max) {}
+bool Analysis::AddressAnalisys::AvlKey::operator<(const AvlKey &key) const
+{
+	return this->max < key.min;
+}
+bool Analysis::AddressAnalisys::AvlKey::operator==(const AvlKey &key) const
+{
+	return (this->min == key.min) && (this->max == key.max);
+}
+bool Analysis::AddressAnalisys::AvlKey::operator<=(const AvlKey &key) const
+{
+	return operator <(key) || operator==(key);
+}
+bool Analysis::AddressAnalisys::AvlKey::operator>(const AvlKey &key) const
+{
+	return ! operator <=(key);
+}
+bool Analysis::AddressAnalisys::AvlKey::operator>=(const AvlKey &key) const
+{
+	return ! operator <(key);
+}
+bool Analysis::AddressAnalisys::AvlKey::operator!=(const AvlKey &key) const
+{
+	return ! operator ==(key);
 }

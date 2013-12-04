@@ -1,11 +1,12 @@
 #pragma once
 #include "basic_type.h"
 
-typedef big_int time_l;
+typedef unsigned long long time_l;
 
 class MyTime : public Basic_Type
 {
 public:
+	friend std::istream &operator >>(std::istream &input, MyTime &time);
 	MyTime(const time_l time = 0);
 	~MyTime(void);
 };

@@ -3,10 +3,15 @@
 
 MyTime::MyTime(const time_l time)
 {
-	val = time;
+	set_val(time);
 }
 
 
 MyTime::~MyTime(void)
 {
 }
+
+/*std::istream &operator >>(std::istream &input, MyTime &time)
+{
+	return input >> time.get_val();
+}*/
