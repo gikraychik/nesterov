@@ -24,7 +24,6 @@ int main(int argc, char **argv)
 		cerr << "Program terminated." << endl;
 		return 1;
 	}*/
-
 	system("pause");
 	return 0;
 }
