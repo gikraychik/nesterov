@@ -74,6 +74,10 @@ void AvlIntTree::make_balance(void)
 			left->balance = 1 - left->balance;
 			/* correct sums (values) */
 			//value += left->value + (left->key.max - left->key.min + 1);
+			if (left)
+			{
+				left->value = (left->right) ? left->right->value + left->right->zeros() : 0;
+			}
 		}
 		else
 		{
@@ -94,6 +98,11 @@ void AvlIntTree::make_balance(void)
 			/* correct sums (value) */
 			//right->value = right->left->value + (right->left->key.max - right->left->key.min + 1);
 			//value = left->value + (left->key.max - left->key.min + 1);
+			if (left)
+			{
+				left->value = (left->right) ? left->right->value + left->right->zeros() : 0;
+			}
+			value = (right) ? right->value + right->zeros() : 0;
 		}
 	}
 	else
@@ -117,6 +126,10 @@ void AvlIntTree::make_balance(void)
 				right->balance = -1 - right->balance;
 				/* correct sums (values) */
 				//right->value = right->left->value + (right->left->key.max - right->left->key.min + 1);
+				if (right)
+				{
+					right->value = (right->right) ? right->right->value + right->right->zeros() : 0;
+				}
 			}
 			else
 			{
@@ -137,9 +150,15 @@ void AvlIntTree::make_balance(void)
 				/* correct sums (values) */
 				//right->value = right->left->value + (right->left->key.max - right->left->key.min + 1);
 				//value = left->value + (left->key.max - left->key.min + 1);
+				if (left)
+				{
+					left->value = (left->right) ? left->right->value + left->right->zeros() : 0;
+				}
+				value = (right) ? right->value + right->zeros() : 0;
 			}
 		}
 	}
+	//value = (right) ? right->value + right->zeros() : 0;
 }
 
 /*
@@ -147,39 +166,43 @@ void AvlIntTree::make_balance(void)
 	Input:
 		index of the address
 	Output:
-		Returns amount of 1 in [0, index) = [0, index - 1]
+		Returns amount of 1 in [prev_index, index)
 */
-int AvlIntTree::calc_stack_dist(unsigned int index) const
+int AvlIntTree::calc_stack_dist(unsigned int prev_index, unsigned int index, unsigned int cache_size) const
 {
-	return index - calc_sum(index - 1);
+	int zeros = calc_sum(prev_index) - (cache_size - index);		// amount of zeros in [prev_index, index)
+	return (index - prev_index - 1) - zeros;
 }
 /*
 	Input:
-		index of address
+		prev_index - index of the most recently used address
+		index - new address
 	Output:
-		Returns amount of 0 in [0, index]
+		Returns amount of 0 in [prev_index, cache_size)
 */
-int AvlIntTree::calc_sum(unsigned int index) const
+int AvlIntTree::calc_sum(unsigned int prev_index) const
 {
 	const AvlIntTree *node = this;
 	const unsigned int delta = key.max - key.min + 1;	// amount of zeros in current node
-	if (index > key.max)
+	if (prev_index < key.min)
 	{
-		return value + delta + ((right != NULL) ? node->right->calc_sum(index) : 0);
+		if (left) { return value + delta + left->calc_sum(prev_index); }
+		else { return value + delta; }
 	}
-	else if (index < key.min)
+	else if (prev_index > key.max)
 	{
-		return (left != NULL) ? node->left->calc_sum(index) : 0;
+		if (right) { return right->calc_sum(prev_index); }
+		else { return 0; }
 	}
 	else
 	{
-		return (index - key.min + 1) + ((left != NULL) ? node->left->calc_sum(index) : 0);
+		return (key.max - prev_index + 1) + value;
 	}
 }
 int AvlIntTree::remove(AvlKey Key, AvlIntTree *parent)
 {
-	int a = balance;										// как дошел до нужного узла перемещаю его , пока оба его потомка не будут NULL
-	if (key == Key)										// и удаляю
+	int a = balance;
+	if (key == Key)
 	{
 		if (right == NULL && left == NULL)
 		{
@@ -211,7 +234,7 @@ int AvlIntTree::remove(AvlKey Key, AvlIntTree *parent)
 					tNode->key = tKey;
 					tNode->value = tValue;
 					/* correct sums (values) */
-					value = (left != NULL) ? left->value + (left->key.max - left->key.min + 1) : 0;
+					value = (right != NULL) ? right->value + (right->key.max - right->key.min + 1) : 0;
 					tNode->value = 0;
 					/* recursive call */
 					balance -= right->remove(Key,this);
@@ -233,7 +256,7 @@ int AvlIntTree::remove(AvlKey Key, AvlIntTree *parent)
 					tNode->key = tKey;
 					tNode->value = tValue;
 					/* correct sums(values) */
-					value = left->value + (left->key.max - left->key.min + 1);
+					value = right->value + (right->key.max - right->key.min + 1);
 					tNode->value = 0;
 					/* recursive call */
 					balance += left->remove(Key,this);
@@ -330,24 +353,32 @@ int AvlIntTree::add_interval(AvlKey new_key)
 	Adds element that was not in the stack before.
 	ind - index of current address
 */
-int AvlIntTree::add_new_elem(unsigned int ind)
+int AvlIntTree::add_new_elem(unsigned int ind, int &delta)
 {
-	// if (empty) { ... }
-	// proccessing mistakes
+	if (empty)
+	{
+		key = AvlKey(ind, ind);
+		value = 0;
+		empty = false;
+		return 0;
+	}
 	int old_bal = balance;
 	if ((key.min == key.max) && (key.min == ind))	// key.min == key.max == ind
 	{
 		remove(this->key);
+		//delta = -1;
 		return 0;
 	}
 	if (ind == key.min)
 	{
 		key.min++;
+		delta = 1;
 		return 0;
 	}
 	if (ind == key.max)
 	{
 		key.max--;
+		delta = 1;
 		return 0;
 	}
 	if ((ind > key.min) && (ind < key.max))		// key.min < ind < key.max
@@ -361,7 +392,7 @@ int AvlIntTree::add_new_elem(unsigned int ind)
 	{
 		if (left)
 		{
-			balance -= left->add_new_elem(ind);
+			balance -= left->add_new_elem(ind, delta);
 			make_balance();
 		}
 		else
@@ -373,7 +404,8 @@ int AvlIntTree::add_new_elem(unsigned int ind)
 	{
 		if (right)
 		{
-			balance += right->add_new_elem(ind);
+			balance += right->add_new_elem(ind, delta);
+			value -= delta;
 			make_balance();
 		}
 		else
@@ -390,7 +422,7 @@ int AvlIntTree::add_new_elem(unsigned int ind)
 	Output:
 		none
 */
-int AvlIntTree::restore(unsigned int ind)
+int AvlIntTree::restore(unsigned int ind, unsigned int &delta)
 {
 	int old_balance = balance;
 	if (key.min - 1 == ind)
@@ -409,12 +441,14 @@ int AvlIntTree::restore(unsigned int ind)
 		{
 			if (left)
 			{
-				balance -= left->restore(ind);
+				balance -= left->restore(ind, delta);
 				make_balance();
 			}
 			else
 			{
 				left = new AvlIntTree(AvlKey(ind, ind), 0);
+				delta = 1;
+				//value = left->key.max - left->key.min + 1;
 				balance--;
 			}
 		}
@@ -422,15 +456,23 @@ int AvlIntTree::restore(unsigned int ind)
 		{
 			if (right)
 			{
-				balance += right->restore(ind);
+				balance += right->restore(ind, delta);
 				make_balance();
+				value += delta;
 			}
 			else
 			{
 				right = new AvlIntTree(AvlKey(ind, ind), 0);
+				delta = 1;
+				value = right->zeros();			// value = 1
 				balance++;
 			}
 		}
 	}
 	return (old_balance == balance) ? 0 : 1;
+}
+
+unsigned int AvlIntTree::zeros(void) const
+{
+	return key.max - key.min + 1;
 }

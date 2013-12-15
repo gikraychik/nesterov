@@ -83,6 +83,7 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 	std::set<Address> cache;
 	std::map<Address, int> index;						// for each address there is an index of it's last use
 	AvlIntTree avl(AvlKey(0, cache_size - 1), 0);		// in the beginning avl tree contains only one node
+	//AvlIntTree avl;
 	for (int i = 0; i < cache_size; i++)
 	{
 		std::set<Address>::iterator itr = cache.find(v[i]);
@@ -90,16 +91,19 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 		{
 			cache.insert(v[i]);
 			index[v[i]] = i;
-			avl.add_new_elem(i);
+			int delta = 0;
+			avl.add_new_elem(i, delta);
 			v[i].dist = inf;
 		}
 		else								// v[i] is already in the stack
 		{
 			int prev_index = index[*itr];
-			avl.add_new_elem(i);
-			avl.restore(prev_index);		// removes prev_index from the avl tree
+			v[i].dist = avl.calc_stack_dist(prev_index, i, cache_size);
+			int delt = 0;
+			avl.add_new_elem(i, delt);
+			unsigned int delta = 0;
+			avl.restore(prev_index, delta);		// removes prev_index from the avl tree
 			index[*itr] = i;
-			v[i].dist = avl.calc_stack_dist(i);
 		}
 	}
 }

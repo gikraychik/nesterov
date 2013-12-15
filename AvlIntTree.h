@@ -22,12 +22,13 @@ class AvlIntTree
 public:
 	AvlIntTree(void);
 	AvlIntTree(const AvlKey &key, uint value);
-	int add_new_elem(unsigned int ind);
+	int add_new_elem(unsigned int ind, int &delta);
 	//int add_existing_elem(unsigned int ind);
 	int add_interval(AvlKey interval);
-	int calc_stack_dist(unsigned int index) const;
+	int calc_stack_dist(unsigned int prev_index, unsigned int index, unsigned int cache_size) const;
 	int remove(AvlKey Key, AvlIntTree *parent = NULL);
-	int restore(unsigned int ind);
+	int restore(unsigned int ind, unsigned int &delta);
+	inline unsigned int zeros(void) const;	// return amount of zeros in current node
 	~AvlIntTree(void);
 
 	// Data section
@@ -41,6 +42,6 @@ public:
 
 private:
 	void make_balance(void);
-	int calc_sum(unsigned int index) const;
+	int calc_sum(unsigned int prev_index) const;
 };
 
