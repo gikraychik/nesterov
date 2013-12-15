@@ -5,8 +5,7 @@
 typedef Analysis::AddressAnalisys::AvlKey KEY;
 typedef unsigned int uint;
 
-class AvlInterval :
-	public AvlTree<KEY, uint>
+template <class Key, Value> class AvlInterval : public Basic_Avl
 {
 public:
 	AvlInterval *left;

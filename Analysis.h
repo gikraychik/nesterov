@@ -32,17 +32,6 @@ public:
 		AddressAnalisys(const Analysis &analis);
 		void calc_stack_dist(void);
 		inline std::vector<Address> addresses(void) const;
-		struct AvlKey
-		{
-			AvlKey(unsigned int min = 0, unsigned int max = 0);
-			inline virtual bool operator <(const AvlKey &key) const;
-			inline virtual bool operator ==(const AvlKey &key) const;
-			inline virtual bool operator <=(const AvlKey &key) const;
-			inline virtual bool operator >(const AvlKey &key) const;
-			inline virtual bool operator >=(const AvlKey &key) const;
-			inline virtual bool operator !=(const AvlKey &key) const;
-			unsigned int min, max;
-		};
 	protected:
 		std::vector<Address> v;
 	private:

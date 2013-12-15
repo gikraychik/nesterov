@@ -1,6 +1,9 @@
 #include "Analysis.h"
 #include <IO_Manager.h>
 #include <limits>
+#include <set>
+#include <map>
+#include "AvlIntTree.h"
 
 Analysis::Analysis(void)
 {
@@ -75,52 +78,33 @@ std::vector<Address> Analysis::AddressAnalisys::addresses(void) const
 
 void Analysis::AddressAnalisys::calc_stack_dist(void)
 {
-	typedef AvlTree<Address, unsigned int> AVL;
-	const unsigned int N = v.size();			// amount of links (addresses)
-	AVL cache;									// contains all addresses that are currently located at the stack (cache)
-	for (unsigned int i = 0; i < N; i++)
+	const unsigned int inf = std::numeric_limits<unsigned int>::max();
+	const unsigned int cache_size = v.size();			// amount of links in stack
+	std::set<Address> cache;
+	std::map<Address, int> index;						// for each address there is an index of it's last use
+	AvlIntTree avl(AvlKey(0, cache_size - 1), 0);		// in the beginning avl tree contains only one node
+	for (int i = 0; i < cache_size; i++)
 	{
-		if (AVL *node = cache.find(v[i]))		// v[i] is already in the cache
+		std::set<Address>::iterator itr = cache.find(v[i]);
+		if (itr == cache.end())				// v[i] is not in the stack
 		{
-			node->value = i;
+			cache.insert(v[i]);
+			index[v[i]] = i;
+			avl.add_new_elem(i);
+			v[i].dist = inf;
 		}
-		else
+		else								// v[i] is already in the stack
 		{
-			cache.add(v[i], i);
+			int prev_index = index[*itr];
+			avl.add_new_elem(i);
+			avl.restore(prev_index);		// removes prev_index from the avl tree
+			index[*itr] = i;
+			v[i].dist = avl.calc_stack_dist(i);
 		}
 	}
 }
 
-/*
-	Defenition of class AvlKey
-	AvlKey is used only in "void cals_stack_dist(void)"
-	AvlKey is a unique key in AVL tree
-*/
-Analysis::AddressAnalisys::AvlKey::AvlKey(unsigned int min, unsigned int max) : min(min), max(max) {}
-bool Analysis::AddressAnalisys::AvlKey::operator<(const AvlKey &key) const
-{
-	return this->max < key.min;
-}
-bool Analysis::AddressAnalisys::AvlKey::operator==(const AvlKey &key) const
-{
-	return (this->min == key.min) && (this->max == key.max);
-}
-bool Analysis::AddressAnalisys::AvlKey::operator<=(const AvlKey &key) const
-{
-	return operator <(key) || operator==(key);
-}
-bool Analysis::AddressAnalisys::AvlKey::operator>(const AvlKey &key) const
-{
-	return ! operator <=(key);
-}
-bool Analysis::AddressAnalisys::AvlKey::operator>=(const AvlKey &key) const
-{
-	return ! operator <(key);
-}
-bool Analysis::AddressAnalisys::AvlKey::operator!=(const AvlKey &key) const
-{
-	return ! operator ==(key);
-}
+
 /*
 	Definition of class AvlKey is over.
 */

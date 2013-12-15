@@ -17,7 +17,6 @@ public:
 	unsigned int get_dist(void) const;
 
 	friend std::istream &operator >>(std::istream &input, Address &addr);
-protected:
 	unsigned int dist;  // stack distance
 private:
 	void transform_to_string(void);  // transforms m_num_addr to string and sets new value for m_str_addr

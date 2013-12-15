@@ -8,14 +8,16 @@
 template <class Key, class Value> class Basic_Avl
 {
 public:
+	/*
 	typedef Basic_Avl Node;			// each AVL tree is not logically the same as Node
 									// but in this very realisation they are equal
+	*/
 	Basic_Avl(void);
 	~Basic_Avl(void);
-	virtual void add(const Key &key, const Value value) = 0;
-	virtual void remove(const Node *node) = 0;
+	virtual int add(const Key &key, Value value) = 0;
+	virtual void remove(const Basic_Avl *avl_tree) = 0;
 	virtual void remove(const Key &key) = 0;
-	virtual Node *find(const Key &key) = 0;
+	virtual Basic_Avl *find(const Key &key) = 0;
 
 protected:
 	virtual void make_balance(void) = 0;
