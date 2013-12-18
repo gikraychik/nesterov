@@ -366,7 +366,7 @@ int AvlIntTree::add_new_elem(unsigned int ind, int &delta)
 	if ((key.min == key.max) && (key.min == ind))	// key.min == key.max == ind
 	{
 		remove(this->key);
-		//delta = -1;
+		delta = 1;
 		return 0;
 	}
 	if (ind == key.min)
@@ -413,6 +413,9 @@ int AvlIntTree::add_new_elem(unsigned int ind, int &delta)
 			throw "AvlIntTree::add_new_elem: element is already in the stack (right case)";
 		}
 	}
+	//return (old_bal == balance) ? 0 : 1;
+	if ((balance * balance == 1) && (old_bal == 0)) { return 1; }
+	else { return 0; }
 }
 
 /*
@@ -427,11 +430,13 @@ int AvlIntTree::restore(unsigned int ind, unsigned int &delta)
 	int old_balance = balance;
 	if (key.min - 1 == ind)
 	{
+		delta = 1;
 		key.min--;
 		return 0;
 	}
 	else if (key.max + 1 == ind)
 	{
+		delta = 1;
 		key.max++;
 		return 0;
 	}
@@ -457,8 +462,8 @@ int AvlIntTree::restore(unsigned int ind, unsigned int &delta)
 			if (right)
 			{
 				balance += right->restore(ind, delta);
-				make_balance();
 				value += delta;
+				make_balance();
 			}
 			else
 			{
@@ -469,7 +474,9 @@ int AvlIntTree::restore(unsigned int ind, unsigned int &delta)
 			}
 		}
 	}
-	return (old_balance == balance) ? 0 : 1;
+	//return ((old_balance == balance)) ? 0 : 1;
+	if ((balance * balance == 1) && (old_balance == 0)) { return 1; }
+	else { return 0; }
 }
 
 unsigned int AvlIntTree::zeros(void) const
