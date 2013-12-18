@@ -82,7 +82,8 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 	const unsigned int cache_size = v.size();			// amount of links in stack
 	std::set<Address> cache;
 	std::map<Address, int> index;						// for each address there is an index of it's last use
-	AvlIntTree avl(AvlKey(0, cache_size - 1), 0);		// in the beginning avl tree contains only one node
+	AvlIntTree avl(AvlKey(0, cache_size - 1), 0);		// in the beginning avl tree contains only one node	
+	avl.par = NULL;
 	//AvlIntTree avl;
 	for (int i = 0; i < cache_size; i++)
 	{
