@@ -74,10 +74,7 @@ void AvlIntTree::make_balance(void)
 			left->balance = 1 - left->balance;
 			/* correct sums (values) */
 			//value += left->value + (left->key.max - left->key.min + 1);
-			if (left)
-			{
-				left->value = (left->right) ? left->right->value + left->right->zeros() : 0;
-			}
+			if (left) { left->value = (left->right) ? left->value - value - zeros() : 0; }
 		}
 		else
 		{
@@ -98,11 +95,10 @@ void AvlIntTree::make_balance(void)
 			/* correct sums (value) */
 			//right->value = right->left->value + (right->left->key.max - right->left->key.min + 1);
 			//value = left->value + (left->key.max - left->key.min + 1);
-			if (left)
-			{
-				left->value = (left->right) ? left->right->value + left->right->zeros() : 0;
-			}
-			value = (right) ? right->value + right->zeros() : 0;
+			int tmp;
+			tmp = left->value - right->value - right->zeros() - value - zeros();		// a
+			value = right->value + right->zeros() + value;								// c
+			left->value = tmp;
 		}
 	}
 	else
@@ -126,10 +122,7 @@ void AvlIntTree::make_balance(void)
 				right->balance = -1 - right->balance;
 				/* correct sums (values) */
 				//right->value = right->left->value + (right->left->key.max - right->left->key.min + 1);
-				if (right)
-				{
-					right->value = (right->right) ? right->right->value + right->right->zeros() : 0;
-				}
+				if (right) { right->value = (right->right) ? value - right->value - right->zeros() : 0; }
 			}
 			else
 			{
@@ -150,11 +143,9 @@ void AvlIntTree::make_balance(void)
 				/* correct sums (values) */
 				//right->value = right->left->value + (right->left->key.max - right->left->key.min + 1);
 				//value = left->value + (left->key.max - left->key.min + 1);
-				if (left)
-				{
-					left->value = (left->right) ? left->right->value + left->right->zeros() : 0;
-				}
-				value = (right) ? right->value + right->zeros() : 0;
+				int tmp = left->value - value - zeros();
+				value = right->zeros() + right->value + value;
+				left->value = tmp;
 			}
 		}
 	}
