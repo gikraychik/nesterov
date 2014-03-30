@@ -3,6 +3,7 @@
 #include <limits>
 #include <set>
 #include <map>
+#include <vector>
 #include "AvlIntTree.h"
 
 Analysis::Analysis(void)
@@ -29,6 +30,10 @@ void Analysis::calc_stack_dist(void)
 
 }
 
+int Analysis::len(void) const
+{
+	return v.size();
+}
 std::vector<Req> Analysis::requests(void) const
 {
 	return v;
@@ -108,8 +113,47 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 		}
 	}
 }
-
-
+Analysis::TimeAnalisys::TimeAnalisys(void) {}
+Analysis::TimeAnalisys::TimeAnalisys(const Analysis &analis)
+{
+	std::vector <unsigned int> data(analis.len()-1, 0);
+	for (int i = 1; i < analis.len(); i++)
+	{
+		data.push_back(analis.time(i).get_val() - analis.time(i-1).get_val());
+	}
+	//double lambda = calc_lambda_moments(data);
+	//std::cout << lambda << std::endl;
+	calc_lambda_distr(data);
+}
+double Analysis::TimeAnalisys::calc_lambda_moments(const std::vector<unsigned int> &data)
+{
+	unsigned int sum = 0;
+	for (int i = 0; i < data.size(); i++)
+		sum += data[i];
+	return (double)data.size() / (double)sum;
+}
+double Analysis::TimeAnalisys::calc_lambda_distr(const std::vector<unsigned int> &data)
+{
+	double sum = 0.0;
+	const double a = 0.0000001;			// must be configured
+	const double b = 1;				// must be configured
+	const double n = data.size();
+	for (int i = 0; i < n; i++)
+		sum += data[i];
+	std::cout << (a*sum*n)/(2 + sum*n) << std::endl;
+	/*std::pair<double, double> res = MyMath::solve_square_equation(sum, n + 2 + a*sum, a*n);
+	if ((res.first >= a) && (res.first <= b)) { std::cout << res.first; }
+	else if ((res.second >= a) && (res.second <= b)) { std::cout << res.second; }
+	else { std::cout << -1; }
+	std::cout << std::endl;*/
+	return 0;
+}
+std::pair<double, double> MyMath::solve_square_equation(double a, double b, double c)
+{
+	double d = b*b - 4*a*c;
+	if (d < 0) { throw 1; }
+	return std::pair<double, double>((-b - sqrt(d)) / (2*a), (-b + sqrt(d)) / (2*a));
+}
 /*
 	Definition of class AvlKey is over.
 */
