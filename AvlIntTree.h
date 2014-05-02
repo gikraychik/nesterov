@@ -26,10 +26,8 @@ public:
 	//int add_existing_elem(unsigned int ind);
 	int add_interval(AvlKey interval);
 	int calc_stack_dist(unsigned int prev_index, unsigned int index, unsigned int cache_size) const;
-	int remove(void);
-	int remove_del(AvlKey Key, AvlIntTree *parent);
+	int remove(AvlKey Key, AvlIntTree *parent = NULL);
 	int restore(unsigned int ind, unsigned int &delta);
-	int merge(AvlIntTree *root);
 	inline unsigned int zeros(void) const;	// return amount of zeros in current node
 	~AvlIntTree(void);
 
@@ -43,9 +41,6 @@ public:
 	bool empty;			// idicates whether key and value are set
 
 private:
-	static void swap(AvlIntTree *node1, AvlIntTree *node2);
-	int remove_by_par(AvlKey key, int &delta);
 	void make_balance(void);
 	int calc_sum(unsigned int prev_index) const;
 };
-

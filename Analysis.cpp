@@ -4,6 +4,7 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <fstream>
 #include "AvlIntTree.h"
 
 Analysis::Analysis(void)
@@ -95,7 +96,7 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 		std::set<Address>::iterator itr = cache.find(v[i]);
 		if (itr == cache.end())				// v[i] is not in the stack
 		{
-			cache.insert(v[i]);
+ 			cache.insert(v[i]);
 			index[v[i]] = i;
 			int delta = 0;
 			avl.add_new_elem(i, delta);
@@ -106,6 +107,7 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 			int prev_index = index[*itr];
 			v[i].dist = avl.calc_stack_dist(prev_index, i, cache_size);
 			int delt = 0;
+			if (i == v.size() - 1) { break; }
 			avl.add_new_elem(i, delt);
 			unsigned int delta = 0;
 			avl.restore(prev_index, delta);		// removes prev_index from the avl tree
@@ -119,34 +121,41 @@ Analysis::TimeAnalisys::TimeAnalisys(const Analysis &analis)
 	std::vector <unsigned int> data(analis.len()-1, 0);
 	for (int i = 1; i < analis.len(); i++)
 	{
-		data.push_back(analis.time(i).get_val() - analis.time(i-1).get_val());
+		data[i-1] = analis.time(i).get_val() - analis.time(i-1).get_val();
 	}
-	//double lambda = calc_lambda_moments(data);
+	double lambda0 = calc_lambda_moments(data);
+	double delta = 0.07;  // 0.05
+	double lambda = calc_lambda_distr(data, lambda0 - delta, lambda0 + delta);
+	FILE *f = fopen("data7_mixed.txt", "a");
+	fprintf(f, "%g\n", lambda);
+	std::cout << lambda << std::endl;
+	fclose(f);
 	//std::cout << lambda << std::endl;
-	calc_lambda_distr(data);
+	//calc_lambda_distr(data);
 }
 double Analysis::TimeAnalisys::calc_lambda_moments(const std::vector<unsigned int> &data)
 {
-	unsigned int sum = 0;
+	double sum = 0.0;
 	for (int i = 0; i < data.size(); i++)
 		sum += data[i];
 	return (double)data.size() / (double)sum;
 }
-double Analysis::TimeAnalisys::calc_lambda_distr(const std::vector<unsigned int> &data)
+double Analysis::TimeAnalisys::calc_lambda_distr(const std::vector<unsigned int> &data, double a, double b)
 {
 	double sum = 0.0;
-	const double a = 0.0000001;			// must be configured
-	const double b = 1;				// must be configured
+	//const double a = 0.0000001;			// must be configured
+	//const double b = 0.09;				// must be configured
 	const double n = data.size();
 	for (int i = 0; i < n; i++)
 		sum += data[i];
-	std::cout << (a*sum*n)/(2 + sum*n) << std::endl;
-	/*std::pair<double, double> res = MyMath::solve_square_equation(sum, n + 2 + a*sum, a*n);
-	if ((res.first >= a) && (res.first <= b)) { std::cout << res.first; }
-	else if ((res.second >= a) && (res.second <= b)) { std::cout << res.second; }
-	else { std::cout << -1; }
-	std::cout << std::endl;*/
-	return 0;
+	//std::cout << (a*sum*n)/(2 + sum*n) << std::endl;
+	std::pair<double, double> res = MyMath::solve_square_equation(sum, -(n + 2 + a*sum), a*n);
+	//if ((res.first >= a) && (res.first <= b)) { std::cout << res.first; }
+	//else if ((res.second >= a) && (res.second <= b)) { std::cout << res.second; }
+	//else { std::cout << -1; }
+	//std::cout << res.first << " " << res.second << std::endl;
+	//std::cout << std::endl;
+	return res.second;
 }
 std::pair<double, double> MyMath::solve_square_equation(double a, double b, double c)
 {

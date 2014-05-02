@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-	/*try
+	try
 	{
 		Analysis analis("100records");
 		for (int i = 0; i < analis.requests().size(); i++)
@@ -25,16 +25,15 @@ int main(int argc, char **argv)
 		cerr << e.what() << endl;
 		cerr << "Program terminated." << endl;
 		return 1;
-	}*/
-	const int NUM = 100;
+	}
+	/*const int NUM = 1000;
 	for (int i = 0; i < NUM; i++)
 	{
 		char str[20];
 		itoa(i, str, 10);
 		Analysis analis(str);
 		Analysis::TimeAnalisys t_analis(analis);
-
-	}
+	}*/
 	system("pause");
 	return 0;
 }

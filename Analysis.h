@@ -45,7 +45,7 @@ public:
 		TimeAnalisys(const Analysis &analis);
 	private:
 		static double calc_lambda_moments(const std::vector<unsigned int> &data);
-		static double calc_lambda_distr(const std::vector<unsigned int> &data);
+		static double calc_lambda_distr(const std::vector<unsigned int> &data, double a, double b);
 	};
 private:
 	std::fstream input;
