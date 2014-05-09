@@ -12,11 +12,13 @@ int main(int argc, char **argv)
 {
 	try
 	{
-		Analysis analis("100records");
-		for (int i = 0; i < analis.requests().size(); i++)
+		Analysis analis("records");
+		cout << "Ok1" << endl;
+		/*for (int i = 0; i < analis.requests().size(); i++)
 		{
 			cout << analis[i].addr << endl;
-		}
+		}*/
+		cout << "Ok2" << endl;
 		Analysis::AddressAnalisys adAnalis(analis);
 		adAnalis.calc_stack_dist();
 	}
@@ -26,6 +28,7 @@ int main(int argc, char **argv)
 		cerr << "Program terminated." << endl;
 		return 1;
 	}
+	
 	/*const int NUM = 1000;
 	for (int i = 0; i < NUM; i++)
 	{
@@ -33,7 +36,7 @@ int main(int argc, char **argv)
 		itoa(i, str, 10);
 		Analysis analis(str);
 		Analysis::TimeAnalisys t_analis(analis);
-	}*/
-	system("pause");
+	}
+	system("pause");*/
 	return 0;
 }
