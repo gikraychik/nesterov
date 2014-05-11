@@ -1,9 +1,9 @@
 #pragma once
 #include <iostream>
-#include <Address.h>
-#include <Analysis.h>
+#include "Address.h"
+#include "Analysis.h"
 #include <exception>
-#include <AvlTree.h>
+#include "AvlTree.h"
 #include <cstring>
 #include <cstdlib>
 using namespace std;
@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
 	try
 	{
-		Analysis analis("records");
+		Analysis analis("rec_stack800_0.3");
 		cout << "Ok1" << endl;
 		/*for (int i = 0; i < analis.requests().size(); i++)
 		{
@@ -21,6 +21,7 @@ int main(int argc, char **argv)
 		cout << "Ok2" << endl;
 		Analysis::AddressAnalisys adAnalis(analis);
 		adAnalis.calc_stack_dist();
+		
 	}
 	catch (exception e)
 	{

@@ -1,5 +1,5 @@
 #include "Analysis.h"
-#include <IO_Manager.h>
+#include "IO_Manager.h"
 #include <limits>
 #include <set>
 #include <map>
@@ -7,6 +7,7 @@
 #include <fstream>
 #include "AvlIntTree.h"
 #include <list>
+#include <map>
 
 Analysis::Analysis(void)
 {
@@ -89,11 +90,11 @@ std::vector<Address> Analysis::AddressAnalisys::addresses(void) const
 
 void Analysis::AddressAnalisys::calc_stack_dist(void)
 {
-	const unsigned int M = 1000;		// size of stack
+	const unsigned int M = 800;		// size of stack
 	const unsigned int inf = std::numeric_limits<unsigned int>::max();
 	const unsigned int cache_size = v.size();			// amount of links in stack
-	std::set<Address> cache;
-	std::map<Address, int> index;						// for each address there is an index of it's last use
+	//std::set<Address> cache;
+	//std::map<Address, int> index;						// for each address there is an index of it's last use
 	AvlIntTree avl(AvlKey(0, cache_size - 1), 0);		// in the beginning avl tree contains only one node	
 	avl.par = NULL;
 	//AvlIntTree avl;
@@ -130,47 +131,120 @@ void Analysis::AddressAnalisys::calc_stack_dist(void)
 			}
 		}
 	}*/
-	std::list<Address> l;
+	std::list<mem_rep> l;
+	std::set<mem_rep> cache;
+	std::map<mem_rep, int> index_old;
+	std::map<mem_rep, std::list<mem_rep>::const_iterator> index;
 	for (int i = 0; i < cache_size; ++i)
 	{
-		std::list<Address>::iterator itr;
+		//std::list<Address>::iterator itr;unsigned long long
+		std::set<mem_rep>::const_iterator itr;
 		int dist = 0;
-		for (itr = l.begin(); itr != l.end(); itr++)
+		/*for (itr = l.begin(); itr != l.end(); itr++)
 		{
-			if (itr->get_val() == v[i].get_val())
-			{
-				break;
-			}
-			dist++;
+		if (itr->get_val() == v[i].get_val())
+		{
+		break;
 		}
-		bool wasFound = (itr != l.end());
+		dist++;
+		}*/
+		//bool wasFound = (itr != l.end());
+		dist = 0;
+		itr = cache.find(v[i].get_val());
+		bool wasFound = (itr != cache.end());
+		int stack_dist = inf;
+		if (wasFound)
+		{
+			int i = 0;
+			for (std::list<mem_rep>::iterator p = l.begin(); p != l.end(); p++)
+			{
+				if (*itr == *p) { stack_dist = i; break; }
+				i++;
+			}
+		}
 		if (l.size() < M)
 		{
 			if (!wasFound)		// not found in stack
 			{
-				l.push_front(v[i]);
+				l.push_front(v[i].get_val());
+				cache.insert(v[i].get_val());
+				index[v[i].get_val()] = l.begin();
+
+				index_old[v[i].get_val()] = i;
+				int delta = 0;
+				avl.add_new_elem(i, delta);
+				v[i].dist = inf;
 			}
 			else					// found in stack
 			{
-				l.erase(itr);
-				l.push_front(v[i]);
+				l.erase(index[*itr]);
+				l.push_front(v[i].get_val());
+				//cache.insert(v[i].get_val());
+				//cache.erase(*itr);
+				index.erase(*itr);
+				index[v[i].get_val()] = l.begin();
+
+				int prev_index = index_old[*itr];
+				v[i].dist = avl.calc_stack_dist(prev_index, i, cache_size);
+				int delt = 0;
+				if (i == v.size() - 1) { break; }
+				avl.add_new_elem(i, delt);
+				unsigned int delta = 0;
+				avl.restore(prev_index, delta);		// removes prev_index from the avl tree
+				index_old[*itr] = i;
 			}
 		}
 		else						// if stack is fullfilled
 		{
 			if (!wasFound)		// not found in stack
 			{
+				cache.erase(l.back());
+				index.erase(l.back());
 				l.pop_back();
-				l.push_front(v[i]);
+				l.push_front(v[i].get_val());
+				cache.insert(v[i].get_val());
+				index[v[i].get_val()] = l.begin();
+
+				int delt = 0;
+				avl.add_new_elem(i, delt);
+				v[i].dist = inf;
+				unsigned int delta = 0;
+				int prev_index = index_old[l.back()];
+				avl.restore(prev_index, delta);
+				index_old.erase(l.back());
+				index_old[v[i].get_val()] = i;
 			}
 			else					// found in stack
 			{
-				l.erase(itr);
-				l.push_front(v[i]);
+				int counter = 0;
+				for (std::list<mem_rep>::iterator p = l.begin(); p != l.end(); p++)
+				{
+					counter++;
+					if (*p == *itr)
+					{
+						//std::cout << counter << std::endl;
+						int y;
+						break;
+					}
+				}
+				l.erase(index[*itr]);
+				//cache.erase(*itr);
+				l.push_front(v[i].get_val());
+				index[v[i].get_val()] = l.begin();
+
+				int prev_index = index_old[*itr];
+				v[i].dist = avl.calc_stack_dist(prev_index, i, cache_size);
+				int delt = 0;
+				if (i == v.size() - 1) { break; }
+				avl.add_new_elem(i, delt);
+				unsigned int delta = 0;
+				avl.restore(prev_index, delta);		// removes prev_index from the avl tree
+				index_old[*itr] = i;
 			}
 		}
-		v[i].dist = (wasFound) ? dist : inf;
+		v[i].dist = stack_dist;
 	}
+	std::cout << "Stack distances succesfully calculated" << std::endl;
 }
 Analysis::TimeAnalisys::TimeAnalisys(void) {}
 Analysis::TimeAnalisys::TimeAnalisys(const Analysis &analis)
